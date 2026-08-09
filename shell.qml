@@ -1,0 +1,145 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import Quickshell
+import Quickshell.Hyprland
+
+import qs.components
+import qs.modules.dashboard as Dashboard
+
+ShellRoot {
+    id: root
+
+    function close() {
+        Qt.quit()
+    }
+
+    PanelWindow {
+        id: window
+
+        screen: Quickshell.screens[0]
+
+        implicitWidth: popup.implicitWidth
+        implicitHeight: popup.implicitHeight
+
+        anchors {
+            top: true
+            left: true
+            right: true
+            bottom: true
+        }
+
+        color: "transparent"
+        focusable: true
+        exclusiveZone: 0
+
+        mask: Region {
+            item: popup
+        }
+
+        ScreenState {
+            id: screenState
+            modelData: window.screen
+        }
+
+        HyprlandFocusGrab {
+            active: true
+            windows: [window]
+
+            onCleared: root.close()
+        }
+
+        Rectangle {
+            id: popup
+
+            anchors.centerIn: parent
+
+            implicitWidth: dashboard.implicitWidth
+            implicitHeight: header.height + dashboard.implicitHeight + 16
+
+            color: "#1e1e2e"
+            radius: 16
+
+            Item {
+                id: header
+
+                anchors {
+                    top: parent.top
+                    left: parent.left
+                    right: parent.right
+                }
+
+                height: 48
+
+                Text {
+                    anchors.centerIn: parent
+
+                    text: "Decoupled Dashboard"
+                    color: "#ffffff"
+
+                    font {
+                        pixelSize: 16
+                        weight: Font.Medium
+                    }
+                }
+
+                Rectangle {
+                    id: closeButton
+
+                    width: 30
+                    height: 30
+
+                    anchors {
+                        right: parent.right
+                        verticalCenter: parent.verticalCenter
+                        rightMargin: 10
+                    }
+
+                    radius: width / 2
+
+                    color: closeMouse.containsMouse
+                        ? "#6b6b65"
+                        : "transparent"
+
+                    Text {
+                        anchors.centerIn: parent
+
+                        text: "×"
+                        color: "#ffffff"
+
+                        font {
+                            pixelSize: 20
+                            weight: Font.Medium
+                        }
+                    }
+
+                    MouseArea {
+                        id: closeMouse
+
+                        anchors.fill: parent
+                        hoverEnabled: true
+
+                        onClicked: root.close()
+                    }
+                }
+            }
+
+            Dashboard.Wrapper {
+                id: dashboard
+
+                screenState: screenState
+
+                anchors {
+                    top: header.bottom
+                    horizontalCenter: parent.horizontalCenter
+                }
+            }
+
+            Shortcut {
+                sequence: "Escape"
+
+                onActivated: root.close()
+            }
+        }
+    }
+}
